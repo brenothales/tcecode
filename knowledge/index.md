@@ -48,6 +48,7 @@ _(a preencher conforme domínios do TCE forem mapeados)_
 
 - [phases-roadmap](/development/phases-roadmap.md) — 6 fases: Foundation → Governance
 - [quality-gate](/development/quality-gate.md) — Checklist do agente antes de concluir tarefa
+- [okf-mermaid-setup](/development/okf-mermaid-setup.md) — Habilitar diagramas Mermaid no viewer OKF
 
 ## Status da Fase 1 — Foundation ✅
 
