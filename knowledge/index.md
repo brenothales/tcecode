@@ -28,7 +28,7 @@ Plataforma institucional de engenharia de software assistida por IA para as squa
 - [adr-004-identity](/decisions/adr-004-identity.md) — Keycloak + OIDC (Fase 2)
 - [adr-005-repositories](/decisions/adr-005-repositories.md) — Multi-repo strategy
 - [adr-006-branding](/decisions/adr-006-branding.md) — Branding do tcecode: limitações sem fork
-- [adr-007-traefik](/decisions/adr-007-traefik.md) — Traefik v3.2 como reverse proxy (substituindo Nginx)
+- [adr-007-traefik](/decisions/adr-007-traefik.md) — Traefik como reverse proxy, atualmente v3.6 (substituindo Nginx)
 - [adr-008-phase2-identity](/decisions/adr-008-phase2-identity.md) — Fase 2: Keycloak + ROPC Grant + JWT institucional
 - [adr-009-fork-opencode](/decisions/adr-009-fork-opencode.md) — Fork thin do OpenCode: tcecode-agent com branding TCE CODE
 
@@ -54,7 +54,7 @@ _(a preencher conforme domínios do TCE forem mapeados)_
 
 Concluída e validada em 2026-08-10.
 Fluxo end-to-end: `tcecode` → OpenCode → **Traefik** → LiteLLM → AI Providers ✅
-Nginx substituído por Traefik v3.2 (ADR-007). Stack 100% production-like.
+Nginx substituído por Traefik (ADR-007, atualizado para v3.6 em 2026-08-10 por incompatibilidade de API Docker com Engine 29.x). Stack 100% production-like.
 
 ## Status da Fase 2 — Identity ✅
 
@@ -62,3 +62,13 @@ Concluída e validada em 2026-08-10.
 `tcecode login` → Keycloak ROPC → JWT (squad + roles) → Bearer token no LiteLLM ✅
 8 serviços rodando: traefik, litellm, postgres, postgres-keycloak, redis, keycloak, prometheus, grafana.
 **Limitação documentada**: LiteLLM `enable_jwt_auth` é enterprise-only — JWT é identidade no tcecode, virtual key é acesso ao LiteLLM. Ver ADR-008 §lição 4.
+
+## Status do Fork (ADR-009) ✅
+
+Fork `tcecode-agent` buildado a partir de `brenothales/opencode` (branch `dev`) e validado end-to-end em 2026-08-10. Dois bugs de auth encontrados e corrigidos no `tcecode` CLI (não no fork): `npm` do provider ausente e `gateway_url` em `http://` em vez de `https://` — ambos causavam `No api key passed in` mesmo com virtual key válida. Ver `log.md` para detalhes completos.
+
+## Status dos Providers (validado em 2026-08-10)
+
+- `institutional-reasoning` (OpenAI `o3`) ✅ funcionando ponta a ponta
+- `institutional-coding` (Anthropic Claude) ❌ sem crédito na conta
+- `institutional-fast` (Gemini `gemini-2.0-flash`) ❌ quota 0 no tier gratuito do projeto Google Cloud/AI Studio (persiste mesmo após trocar a API key — é o projeto, não a chave)

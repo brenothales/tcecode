@@ -23,10 +23,15 @@ OUTPUT="$BUNDLE_DIR/viz.html"
 
 if [[ -f "$OUTPUT" ]]; then
   echo "Gerado: $OUTPUT"
-  # Abrir no browser se possível
-  if command -v open &>/dev/null; then
-    open "$OUTPUT"
+  # Abrir no browser se possível — best-effort, nunca deve derrubar o script
+  # (a geração acima já terminou com sucesso nesse ponto).
+  if grep -qi microsoft /proc/version 2>/dev/null && command -v explorer.exe &>/dev/null; then
+    # WSL: usa o navegador padrão do Windows via explorer.exe.
+    # explorer.exe costuma retornar código != 0 mesmo quando abre com sucesso.
+    explorer.exe "$(wslpath -w "$OUTPUT")" || true
+  elif command -v open &>/dev/null; then
+    open "$OUTPUT" || true
   elif command -v xdg-open &>/dev/null; then
-    xdg-open "$OUTPUT"
+    xdg-open "$OUTPUT" || true
   fi
 fi

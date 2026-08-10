@@ -1,7 +1,7 @@
 ---
 type: Decision
 title: ADR-007 — Traefik como Reverse Proxy (substituindo Nginx)
-description: Troca do Nginx pelo Traefik v3.2 como reverse proxy do AI Gateway.
+description: Troca do Nginx pelo Traefik (atualmente v3.6) como reverse proxy do AI Gateway.
 tags: [gateway, infra, traefik, nginx, proxy]
 generated:
   by: "claude-code/sonnet-4-6"
@@ -22,7 +22,7 @@ Adicionalmente, o caminho de migração para Kubernetes (planejado para a fase d
 
 ## Decisão
 
-Substituir Nginx por **Traefik v3.2** como reverse proxy único.
+Substituir Nginx por **Traefik** (v3.2 na implementação inicial, **v3.6** desde 2026-08-10 — ver lição abaixo) como reverse proxy único.
 
 Configuração dividida em dois arquivos:
 - `traefik/traefik.yaml` — config estática: entrypoints (80→redirect, 443), providers (docker + file), dashboard
@@ -42,6 +42,10 @@ Roteamento via **Docker labels** no `docker-compose.yaml`. Cada rota tem priorid
 **Lição aprendida (replacePath):** Para reescrever path (ex.: `/health` → `/health/liveliness`), usar middleware `replacePath` no `dynamic.yaml`, não `stripprefix` nem `server.url` em label (inválido no Traefik v3).
 
 **Lição aprendida (SSL em tcecode status):** O comando `tcecode status` usa `urllib.request.urlopen` que verifica certificado por padrão. Com certs autoassinados (dev), é necessário criar um `ssl.SSLContext` com `CERT_NONE` — equivalente ao `-k` do curl.
+
+**Lição aprendida (certs ausentes):** `traefik/dynamic.yaml` referencia `/certs/tce-ai.crt` e `/certs/tce-ai.key`, mas esses arquivos não são versionados (`.gitignore`) e não há script/target automatizado para gerá-los. Em setup novo, o Traefik sobe mas falha ao criar o certificate store (`"failed to load X509 key pair: tls: failed to find any PEM data"`) e a entrypoint `websecure` fica sem TLS funcional. Gerar manualmente com `openssl req -x509 -nodes -newkey rsa:2048 -days 825 -keyout tce-ai.key -out tce-ai.crt -subj "/CN=localhost/O=TCE Code (dev)" -addext "subjectAltName=DNS:localhost,DNS:traefik.localhost,DNS:*.localhost,IP:127.0.0.1"` dentro de `gateway/traefik/`. Vale automatizar isso como target `make gen-certs`.
+
+**Lição aprendida (Docker API 1.24 vs Docker Engine 29.x):** `traefik:v3.2` embute um client Docker SDK que usa a API version 1.24 por padrão para o provider `docker`. Docker Engine 29.x elevou a API mínima suportada para 1.40+, rejeitando esse client — sintoma: `"Failed to retrieve information of the docker client and server host"` em loop, container fica `unhealthy`, nenhuma rota via label é descoberta (o file provider com Keycloak continua funcionando, mascarando parcialmente o problema). Não é resolvível via env `DOCKER_API_VERSION` (o client da v3.2 não respeita a env var). Corrigido subindo a imagem para **`traefik:v3.6`**, que implementa auto-negociação de versão da API Docker ([traefik/traefik#12253](https://github.com/traefik/traefik/issues/12253)). Se o host tiver Docker Engine < 29, v3.2 continua funcionando normalmente — o problema só se manifesta com engines novos.
 
 ## Consequências
 

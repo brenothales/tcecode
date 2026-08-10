@@ -27,7 +27,7 @@ graph TD
     CLI["tcecode CLI (Python)\n• autenticação OIDC\n• configura agente\n• gerencia Skills"]
     Agent["TCE CODE Agent (fork OpenCode)\n• TUI terminal\n• lê AGENTS.md\n• lê .okf/ do projeto\n• MCP client"]
     Keycloak["Keycloak OIDC\nIdentity Provider"]
-    Traefik["Traefik v3.2\nReverse Proxy / TLS"]
+    Traefik["Traefik v3.6\nReverse Proxy / TLS"]
     Gateway["LiteLLM Gateway\n• Auth → RBAC → Router\n• rate limit / quotas\n• audit log (OTel)\n• fallback automático"]
     Anthropic["Anthropic\n(Claude)"]
     OpenAI["OpenAI\n(GPT / o3)"]

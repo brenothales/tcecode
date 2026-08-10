@@ -11,7 +11,7 @@ TOKEN_FILE = TCE_HOME / "token.json"
 BIN_DIR = TCE_HOME / "bin"
 AGENT_BIN = BIN_DIR / "tcecode-agent"
 
-GATEWAY_URL = os.environ.get("TCECODE_GATEWAY_URL", "http://localhost/v1")
+GATEWAY_URL = os.environ.get("TCECODE_GATEWAY_URL", "https://localhost/v1")
 DEFAULT_MODEL = os.environ.get("TCECODE_MODEL", "institutional-coding")
 KEYCLOAK_URL = os.environ.get("TCECODE_KEYCLOAK_URL", "https://localhost/auth/realms/tce-ai")
 
@@ -70,8 +70,12 @@ def write_agent_config(cfg: TceCodeConfig, api_key: str) -> None:
 
     # v1 config format: key "provider" (singular) — lido pelo provider.ts interno
     # options.apiKey e options.baseURL são mapeados corretamente pelo ConfigProviderOptionsV1
+    # "npm" é obrigatório: sem ele, ConfigProviderOptionsV1.get() cai no lowerer "raw" e
+    # nunca gera o header Authorization (apiKey vai parar dentro do body, sem efeito) —
+    # ver v1/config/migrate.ts:171 e v1/config/provider-options.ts:17-27.
     # whitelist filtra modelos do catálogo models.dev para só mostrar os institucionais
     provider_cfg: dict = {
+        "npm": "@ai-sdk/openai",
         "options": {"apiKey": api_key, "baseURL": cfg.gateway_url},
     }
     if models:
