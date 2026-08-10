@@ -1,0 +1,66 @@
+tls:
+  stores:
+    default:
+      defaultCertificate:
+        certFile: /certs/tce-ai.crt
+        keyFile: /certs/tce-ai.key
+
+http:
+  middlewares:
+    # Rate limiting — 60 req/min por IP, burst de 20
+    rate-limit:
+      rateLimit:
+        average: 60
+        burst: 20
+        period: 1m
+
+    # Restrição por IP para endpoints internos (grafana, dashboard)
+    internal-only:
+      ipAllowList:
+        sourceRange:
+          - "127.0.0.1/32"
+          - "10.0.0.0/8"
+          - "172.16.0.0/12"
+          - "192.168.0.0/16"
+
+    # Reescreve /health → /health/liveliness (LiteLLM requer o path completo)
+    health-rewrite:
+      replacePath:
+        path: "/health/liveliness"
+
+    # Headers de segurança (sintaxe Traefik v3)
+    secure-headers:
+      headers:
+        customResponseHeaders:
+          X-Frame-Options: "DENY"
+          X-Content-Type-Options: "nosniff"
+          Referrer-Policy: "strict-origin-when-cross-origin"
+
+  routers:
+    # OIDC protocol endpoints — públicos para tcecode login (Device Auth Flow)
+    keycloak-oidc:
+      rule: "PathPrefix(`/auth/realms/tce-ai/protocol`)"
+      entrypoints:
+        - websecure
+      tls: {}
+      middlewares:
+        - rate-limit
+      priority: 50
+      service: keycloak
+
+    # Admin console + realm config — acesso interno apenas
+    keycloak-admin:
+      rule: "PathPrefix(`/auth`)"
+      entrypoints:
+        - websecure
+      tls: {}
+      middlewares:
+        - internal-only
+      priority: 40
+      service: keycloak
+
+  services:
+    keycloak:
+      loadBalancer:
+        servers:
+          - url: "http://keycloak:8080"

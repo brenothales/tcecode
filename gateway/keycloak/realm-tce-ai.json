@@ -1,0 +1,79 @@
+{
+  "realm": "tce-ai",
+  "displayName": "TCE AI Platform",
+  "enabled": true,
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": false,
+  "rememberMe": true,
+  "accessTokenLifespan": 300,
+  "ssoSessionIdleTimeout": 3600,
+  "ssoSessionMaxLifespan": 36000,
+  "offlineSessionIdleTimeout": 2592000,
+  "roles": {
+    "realm": [
+      {"name": "AI_PLATFORM_ADMIN", "description": "Administrador da plataforma AI"},
+      {"name": "AI_SQUAD_ADMIN", "description": "Administrador de squad AI"},
+      {"name": "AI_DEVELOPER", "description": "Desenvolvedor com acesso ao coding agent"},
+      {"name": "AI_AUDITOR", "description": "Auditor — acesso somente a logs"},
+      {"name": "AI_READONLY", "description": "Acesso somente leitura"}
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "tcecode-cli",
+      "name": "TCE Code CLI",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "protocol": "openid-connect",
+      "attributes": {
+        "oauth2.device.authorization.grant.flow.enabled": "true",
+        "oauth2.device.polling.interval": "5"
+      },
+      "defaultClientScopes": ["web-origins", "acr", "profile", "roles", "email"],
+      "optionalClientScopes": ["address", "phone", "offline_access"],
+      "protocolMappers": [
+        {
+          "name": "squad-mapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "squad",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "squad",
+            "jsonType.label": "String"
+          }
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "dev-test",
+      "email": "dev@tce.gov.br",
+      "firstName": "Dev",
+      "lastName": "Test",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Dev@tce123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["AI_DEVELOPER"],
+      "attributes": {
+        "squad": ["squad-test"]
+      }
+    }
+  ]
+}

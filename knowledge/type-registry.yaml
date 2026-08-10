@@ -1,0 +1,13 @@
+# Paleta de tipos do bundle tce-ai-platform
+# Mesclada sobre a paleta padrão do reference_agent
+
+index: "#6B7280"
+architecture: "#2563EB"
+decision: "#7C3AED"
+development: "#059669"
+agents: "#D97706"
+patterns: "#0891B2"
+domains: "#BE185D"
+Service: "#2563EB"
+Architecture Pattern: "#0891B2"
+Decision: "#7C3AED"

@@ -1,0 +1,26 @@
+groups:
+  - name: litellm
+    rules:
+      - alert: GatewayHighErrorRate
+        expr: rate(litellm_requests_total{status=~"5.."}[5m]) / rate(litellm_requests_total[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "AI Gateway com taxa de erro > 5%"
+
+      - alert: GatewayHighLatency
+        expr: histogram_quantile(0.95, rate(litellm_request_duration_seconds_bucket[5m])) > 30
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Latência p95 do Gateway > 30s"
+
+      - alert: GatewayDown
+        expr: up{job="litellm"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "AI Gateway está down"
