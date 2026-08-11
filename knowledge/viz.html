@@ -7,7 +7,8 @@
 <title>OKF Bundle Viewer</title>
 <script src="https://cdn.jsdelivr.net/npm/cytoscape@3.28.1/dist/cytoscape.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script>window.mermaid_config = { startOnLoad: false };</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
 <style>
 /* ---------------------------------------------------------------------
    Design tokens. Light values on :root, dark values under the OS media
@@ -629,9 +630,7 @@ window.BUNDLE = {"nodes": [{"data": {"id": "agents/tce-agent", "label": "TCE Age
   document.getElementById("bundle-stats").textContent =
     `${bundle.nodes.length} concept${bundle.nodes.length === 1 ? "" : "s"} · ${bundle.edges.length} link${bundle.edges.length === 1 ? "" : "s"}`;
 
-  // Resolved color per type (from actual node data, so it always matches
-  // what the generator picked — including its fallback for unknown types —
-  // rather than trusting bundle.palette to have every key).
+  // Resolved color per type
   const typeColor = {};
   for (const n of bundle.nodes) {
     if (!(n.data.type in typeColor)) typeColor[n.data.type] = n.data.color;
