@@ -1,5 +1,13 @@
 # Log
 
+## 2026-08-11 (curl no install.sh dava 404 — repo privado, precisa de git clone via SSH)
+
+`curl -fsSL https://bitbucket.org/tcesc-git/tcecode/raw/master/scripts/install.sh` retornava 404. Confirmado via `curl https://api.bitbucket.org/2.0/repositories/tcesc-git/tcecode` ("You may not have access... make sure you are authenticated") que **o repo é privado** — Bitbucket responde 404 (não 401/403) pra `raw/` sem autenticação, de propósito, pra não vazar a existência do repo.
+
+Não dá pra ter um `curl | bash` 100% anônimo enquanto o repo for privado. Fix: o one-liner agora é `git clone git@bitbucket.org:tcesc-git/tcecode.git ~/.local/share/tcecode-src && bash .../install.sh` — usa SSH (já é pré-requisito pro resto do fluxo mesmo) em vez de tentar baixar o script cru via HTTPS anônimo. Path de clone bate com o que `install.sh` já esperava, então não duplica trabalho. Atualizado em `install.sh`, `install.ps1`, ADR-010 e na landing page publicada.
+
+---
+
 ## 2026-08-11 (instalador one-liner — simplificado, sem CI de binários)
 
 Primeira versão do ADR-010 publicava binários pré-buildados via Bitbucket Pipelines (tag `agent-v*` → build cross-platform via `bun build --compile` → upload para Bitbucket Downloads com Repository Access Token). Descartada a pedido — complexidade desnecessária pro estágio atual do projeto.

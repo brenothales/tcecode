@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 # Instalador do tcecode — Linux e macOS.
 #
-# Uso:
-#   curl -fsSL https://bitbucket.org/tcesc-git/tcecode/raw/master/scripts/install.sh | bash
+# Uso (requer SSH configurado para bitbucket.org — o repo é privado, então
+# não dá pra baixar este script direto via curl/HTTPS anônimo):
+#   git clone git@bitbucket.org:tcesc-git/tcecode.git ~/.local/share/tcecode-src \
+#     && bash ~/.local/share/tcecode-src/scripts/install.sh
 #
 # Clona o repositório institucional (CLI + fork do OpenCode) e builda o
 # tcecode-agent localmente com Bun. Não depende de binário pré-buildado —

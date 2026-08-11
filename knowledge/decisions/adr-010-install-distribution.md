@@ -33,6 +33,15 @@ O repositório institucional vive no Bitbucket (`git@bitbucket.org:tcesc-git/tce
 
 Preferem SSH (`git@bitbucket.org`) quando configurado, caem para HTTPS com aviso caso contrário — mesma lógica para o fork no GitHub.
 
+**Como buscar o próprio script**: `tcesc-git/tcecode` é **privado** (confirmado via API — Bitbucket retorna 404, não 401/403, pra arquivo `raw/` sem autenticação, propositalmente pra não vazar se o repo existe). Isso quebra o padrão clássico `curl -fsSL <url> | bash`: um `curl` anônimo no endpoint `raw/master/scripts/install.sh` sempre dá 404. A forma que funciona (reaproveitando o SSH que já é pré-requisito pro resto do fluxo):
+
+```bash
+git clone git@bitbucket.org:tcesc-git/tcecode.git ~/.local/share/tcecode-src \
+  && bash ~/.local/share/tcecode-src/scripts/install.sh
+```
+
+Como esse é exatamente o path (`~/.local/share/tcecode-src`) que o próprio `install.sh` espera, o clone manual vira só um "aquecimento" — o script detecta o clone existente e segue (`git pull --ff-only` em vez de clonar de novo).
+
 ## Alternativa descartada: binários pré-buildados via CI
 
 Uma primeira versão publicava binários pré-buildados (Bitbucket Pipelines, disparado em tags `agent-v*`, build cross-platform via `bun build --compile`, upload para Bitbucket Downloads via Repository Access Token). Descartada porque:
@@ -49,7 +58,7 @@ Se o tempo de build virar um problema real (squads grandes, máquinas lentas), v
 - Sem infraestrutura de CI/credenciais extra para manter.
 
 **Trade-offs / pendências:**
-- **Repositório privado**: se `tcesc-git/tcecode` não for público, `git clone`/`pipx install` exigem credenciais (SSH configurado ou HTTPS com prompt). Os scripts tentam SSH primeiro e avisam se cair para HTTPS.
+- **Repositório privado**: confirmado — exige SSH configurado (chave cadastrada no Bitbucket) tanto pra buscar o `install.sh` quanto pra clonar o repo e o fork. Não existe versão 100% anônima do one-liner enquanto o repo for privado.
 - **Tempo de instalação**: build local do fork (~2-3 min na primeira vez, incluindo `bun install` do monorepo inteiro) — não é instantâneo como baixar um binário pronto.
 - **Windows nativo**: `AGENT_BIN` em `config.py` não distingue `.exe`; suporte Windows do `tcecode` CLI em si é best-effort, não validado numa máquina Windows real.
 - **Não testado**: scripts escritos e revisados, mas não executados de ponta a ponta numa máquina limpa nem no Bitbucket institucional real.

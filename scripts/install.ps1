@@ -1,7 +1,9 @@
 # Instalador do tcecode — Windows (PowerShell).
 #
-# Uso:
-#   irm https://bitbucket.org/tcesc-git/tcecode/raw/master/scripts/install.ps1 | iex
+# Uso (requer SSH configurado para bitbucket.org — o repo e privado, entao
+# nao da pra baixar este script direto via irm/HTTPS anonimo):
+#   git clone git@bitbucket.org:tcesc-git/tcecode.git $env:LOCALAPPDATA\tcecode-src
+#   & "$env:LOCALAPPDATA\tcecode-src\scripts\install.ps1"
 #
 # Clona o repositório institucional (CLI + fork do OpenCode) e builda o
 # tcecode-agent localmente com Bun. Não depende de binário pré-buildado —
