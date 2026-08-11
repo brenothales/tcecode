@@ -31,7 +31,7 @@ Plataforma institucional de engenharia de software assistida por IA para as squa
 - [adr-007-traefik](/decisions/adr-007-traefik.md) — Traefik como reverse proxy, atualmente v3.6 (substituindo Nginx)
 - [adr-008-phase2-identity](/decisions/adr-008-phase2-identity.md) — Fase 2: Keycloak + ROPC Grant + JWT institucional
 - [adr-009-fork-opencode](/decisions/adr-009-fork-opencode.md) — Fork thin do OpenCode: tcecode-agent com branding TCE CODE
-- [adr-010-install-distribution](/decisions/adr-010-install-distribution.md) — Instalador one-liner via Bitbucket Downloads (draft, não validado)
+- [adr-010-install-distribution](/decisions/adr-010-install-distribution.md) — Instalador one-liner (curl/irm) — clona e builda o fork localmente, sem CI de binários
 
 ## Domains
 

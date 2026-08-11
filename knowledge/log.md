@@ -1,5 +1,15 @@
 # Log
 
+## 2026-08-11 (instalador one-liner — simplificado, sem CI de binários)
+
+Primeira versão do ADR-010 publicava binários pré-buildados via Bitbucket Pipelines (tag `agent-v*` → build cross-platform via `bun build --compile` → upload para Bitbucket Downloads com Repository Access Token). Descartada a pedido — complexidade desnecessária pro estágio atual do projeto.
+
+Versão final: `scripts/install.sh`/`install.ps1` clonam o repo (`tcesc-git/tcecode`) + o fork (`brenothales/opencode`, branch `dev`) e buildam localmente com Bun a cada instalação (~2-3 min). `bitbucket-pipelines.yml` removido. `cli/tcecode/agent.py` revertido para o estado original (download de release do GitHub como fallback — sabidamente quebrado, mas só é acionado se o build local falhar e não houver instalação de sistema).
+
+**Lição:** `agent.py` resolve `_FORK_BIN` como path relativo ao próprio clone do repo (`Path(__file__).parent.parent.parent`) — só funciona com `pipx install -e` a partir de um clone persistente. Instalador precisa manter esse clone (`~/.local/share/tcecode-src`), não pode instalar o CLI "solto".
+
+---
+
 ## 2026-08-10 (institutional-fast — quota Gemini zerada, não é bug de config)
 
 `institutional-fast` (`gemini/gemini-2.0-flash`) segue falhando com `429 RESOURCE_EXHAUSTED, limit: 0` mesmo após trocar `GEMINI_API_KEY` no `.env` e recriar o container (`docker compose up -d litellm` — confirmado via env dentro do container que a chave nova carregou). Quota 0 no tier gratuito é do **projeto Google Cloud/AI Studio por trás da chave**, não da chave em si — troca de chave sozinha não resolve se o projeto não tem billing habilitado. Ação pendente: habilitar billing no projeto ou usar chave de projeto com billing ativo. `institutional-coding` (Anthropic, sem crédito) e `institutional-reasoning` (OpenAI ✅) não são afetados.
