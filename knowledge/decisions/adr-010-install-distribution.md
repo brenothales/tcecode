@@ -35,7 +35,7 @@ O repositório institucional vive no Bitbucket (`git@bitbucket.org:tcesc-git/tce
 
 **Trade-offs / pendências:**
 - **Repositório privado**: se `tcesc-git/tcecode` não for público, tanto o `pipx install` quanto o `curl`/`tcecode update` exigem credenciais (chave SSH configurada ou App Password via `.netrc`) — não é um one-liner 100% anônimo. Os scripts tentam SSH primeiro e avisam se cair para HTTPS.
-- **Credenciais do pipeline**: `BB_DOWNLOADS_USER` e `BB_DOWNLOADS_APP_PASSWORD` (App Password com escopo "Repositories: Write") precisam ser configuradas manualmente em Repository settings → Repository variables. Não configurado neste momento.
+- **Credenciais do pipeline**: `BB_DOWNLOADS_TOKEN` (Repository Access Token, escopo "Repositories: Write", gerado em Repository settings → Security → Access tokens) precisa ser configurado manualmente em Repository settings → Repository variables, marcado Secured. Preferido a App Password: escopado só a este repositório, não à conta pessoal de quem gerou. Não configurado neste momento.
 - **Não testado**: este ambiente de desenvolvimento não tem acesso ao Bitbucket institucional para rodar o pipeline de verdade. Validar na primeira tag `agent-v0.1.0`.
 - **Windows nativo**: `AGENT_BIN` em `config.py` não distingue `.exe`; suporte Windows do `tcecode` CLI em si é best-effort, não validado.
 - **Fork ainda no GitHub**: o pipeline clona `brenothales/opencode` via HTTPS público do GitHub como fonte de build. Se o fork migrar para o Bitbucket institucional, atualizar a URL de clone no `bitbucket-pipelines.yml`.

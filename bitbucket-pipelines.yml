@@ -5,8 +5,9 @@
 # sem precisar de macOS/Windows nativos (ver opencode/packages/opencode/script/build.ts).
 #
 # Setup necessário no repositório Bitbucket (Repository settings > Repository variables):
-#   BB_DOWNLOADS_USER          - usuário Bitbucket com permissão de escrita no repo
-#   BB_DOWNLOADS_APP_PASSWORD  - App Password (escopo "Repositories: Write"), marcada Secured
+#   BB_DOWNLOADS_TOKEN  - Repository Access Token (Repository settings > Security > Access tokens)
+#                         com permissão "Repositories: Write". Marcar como Secured.
+#                         Preferido sobre App Password: escopado só a este repo, não à conta pessoal.
 #
 # O fork (brenothales/opencode, branch dev) é clonado via HTTPS público do GitHub.
 # Se o fork migrar para o Bitbucket institucional, trocar a URL do clone abaixo.
@@ -42,7 +43,7 @@ definitions:
               echo "Publicando ${asset}..."
               curl --fail -X POST \
                 "https://api.bitbucket.org/2.0/repositories/${BITBUCKET_WORKSPACE}/${BITBUCKET_REPO_SLUG}/downloads" \
-                -u "${BB_DOWNLOADS_USER}:${BB_DOWNLOADS_APP_PASSWORD}" \
+                -H "Authorization: Bearer ${BB_DOWNLOADS_TOKEN}" \
                 -F "files=@${asset}"
             done
 
