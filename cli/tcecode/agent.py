@@ -80,14 +80,25 @@ def agent_path() -> Path:
     return AGENT_BIN
 
 
+# Bitbucket Downloads do repo institucional — publicado por bitbucket-pipelines.yml
+# a cada tag "agent-v*" (ver ADR-010). Nome fixo por plataforma (sobrescrito a
+# cada publish), não versionado por download — a versão instalada fica em
+# versions.json, buildada a partir do commit taggeado.
+BITBUCKET_WORKSPACE = os.environ.get("TCECODE_BITBUCKET_WORKSPACE", "tcesc-git")
+BITBUCKET_REPO = os.environ.get("TCECODE_BITBUCKET_REPO", "tcecode")
+BITBUCKET_DOWNLOADS_URL = f"https://bitbucket.org/{BITBUCKET_WORKSPACE}/{BITBUCKET_REPO}/downloads"
+
+
 def _platform_asset() -> str:
     system = platform.system().lower()
     machine = platform.machine().lower()
-    arch = "arm64" if machine in ("arm64", "aarch64") else "x86_64"
+    arch = "arm64" if machine in ("arm64", "aarch64") else "x64"
     if system == "darwin":
-        return f"opencode-{arch}-apple-darwin.tar.gz"
+        return f"opencode-darwin-{arch}.tar.gz"
     if system == "linux":
-        return f"opencode-{arch}-unknown-linux-musl.tar.gz"
+        return f"opencode-linux-{arch}.tar.gz"
+    if system == "windows":
+        return f"opencode-windows-{arch}.zip"
     raise RuntimeError(f"Sistema não suportado: {system}/{machine}")
 
 
@@ -100,13 +111,13 @@ def install_agent(version: str = APPROVED_VERSION) -> None:
         _link_system_bin(system_bin)
         return
 
-    # Download do GitHub
+    # Download do Bitbucket Downloads (binário do fork tcecode-agent, publicado via CI)
     asset = _platform_asset()
-    url = f"https://github.com/sst/opencode/releases/download/v{version}/{asset}"
+    url = f"{BITBUCKET_DOWNLOADS_URL}/{asset}"
     BIN_DIR.mkdir(parents=True, exist_ok=True)
     tmp_archive = BIN_DIR / asset
 
-    print(f"Baixando tcecode engine v{version}...")
+    print(f"Baixando tcecode engine ({asset})...")
     try:
         req = urllib.request.Request(url, headers={"User-Agent": "tcecode/0.1"})
         with urllib.request.urlopen(req, timeout=60) as resp, open(tmp_archive, "wb") as f:
@@ -114,20 +125,27 @@ def install_agent(version: str = APPROVED_VERSION) -> None:
     except Exception as e:
         tmp_archive.unlink(missing_ok=True)
         raise RuntimeError(
-            f"Falha ao baixar engine: {e}\n"
-            "Instale o OpenCode manualmente: https://opencode.ai\n"
+            f"Falha ao baixar engine de {url}: {e}\n"
+            "Se o repositório Bitbucket for privado, configure credenciais "
+            "(ex: netrc) ou instale o binário manualmente em "
+            f"{AGENT_BIN}.\n"
             "Depois rode 'tcecode update' novamente."
         ) from e
 
-    # Extrair
-    import tarfile
-    with tarfile.open(tmp_archive) as tar:
-        tar.extractall(BIN_DIR)
+    # Extrair (tar.gz em Linux/macOS, zip em Windows)
+    if asset.endswith(".zip"):
+        import zipfile
+        with zipfile.ZipFile(tmp_archive) as zf:
+            zf.extractall(BIN_DIR)
+    else:
+        import tarfile
+        with tarfile.open(tmp_archive) as tar:
+            tar.extractall(BIN_DIR)
     tmp_archive.unlink(missing_ok=True)
 
-    # Localizar binary extraído
-    candidates = list(BIN_DIR.glob("opencode*"))
-    binary = next((c for c in candidates if os.access(c, os.X_OK) and c != AGENT_BIN), None)
+    # Localizar binary extraído (tcecode-agent ou tcecode-agent.exe)
+    candidates = list(BIN_DIR.glob("tcecode-agent*"))
+    binary = next((c for c in candidates if c != AGENT_BIN), None)
     if binary and binary != AGENT_BIN:
         binary.rename(AGENT_BIN)
 
